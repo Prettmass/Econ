@@ -1,0 +1,163 @@
+
+
+For a Normal Distribution that has mean 1 and standard deviation 6.5, what is the area to the left of 1.65?
+Z = (1.65 - 1)/ 6.5
+Z = 0.1
+Area to the Left = .53983
+
+For a Normal Distribution that has mean 8 and standard deviation 2.7, what is the area in both tails farther from the mean than 13.67?
+Z = (13.67 - 8)/ 2.7
+Z = 2.1
+Area to the Left = .01786
+Two Tails = .01786 x 2 = .03572
+
+For a Normal Distribution that has mean -11 and standard deviation 4, what is the area in both tails farther from the mean than -5.4?
+Z = (-5.4 + 11)/ 4
+Z = 1.4
+Area to the Left = .08076
+Two Tails = .08076 x 2 = .016152
+
+For a Normal Distribution that has mean 14 and standard deviation 7.4 what two values leave probability 0.158 in both tails?
+Z = (X - 14)/ 7.4
+Z = 0.158 in both ends
+Z that gives 0.158 = 1 
+X = 21.4
+
+A regression coefficient is estimated to be equal to 6.56 with standard error 4.1; there are 24 degrees of freedom. What is the p-value (from the t-statistic) against the null hypothesis of zero?
+
+T statistic = 1.711
+p value = .049989
+
+A regression coefficient is estimated to be equal to -0.24 with standard error 0.4; there are 4 degrees of freedom. What is the p-value (from the t-statistic) against the null hypothesis of zero?
+
+T statistic = 2.132
+p value = .049991
+
+As we consider, “did everything change after March 2020?” look at crude oil prices. The average daily return of crude oil was 0.000145 with standard deviation of 0.0213 in 289 days before March 1. Average daily return after that date was -0.0210 with standard deviation of 0.271 in 174 days after. Is there a statistically significant difference in the mean? Calculate t-stat and p-value for the test against no difference in daily returns.
+
+Average daily return = 0.000145
+STD = 0.0213 
+days = 289
+
+after
+average daily return = -0.0210
+STD = 0.271
+days = 174
+
+T-stat = 1.058
+P-value = 0.145761
+we can not regect the null so we can't say thet there is a difference.
+
+In good news, there was information about vaccine trials. Consider (these are not quite the actual data but a simplified version) looking at 2 groups, each with 10,000 people. In the control group who did not get the vaccine there were 90 infections. In the test group that did get the vaccine there were 15 infections. Calculate the t-stat and p-value for the test against no difference in infection rates between groups.
+
+2 Test Groups
+10,000 each
+
+Control group
+90 infections
+
+Test group
+15 infections
+
+T-stat = 75
+P-value = .0001
+we regect the null, there is a difference in the groups.
+```{r}
+rm(list = ls())
+```
+
+```{r}
+load("~/Metrics/Exam2/Exam2/acs2017_ny_data.RData")
+```
+
+```{r}
+attach(acs2017_ny)
+use_varb <- (AGE >= 25) & (AGE <= 55) 
+dat_use <- subset(acs2017_ny,use_varb) # 
+detach()
+```
+4) I will be using people who are with in the age to being working full time. I want to take out children and elderly people who are choosing to work more so do to health related to age and not for any other reason.
+
+
+```{r}
+attach(acs2017_ny)
+Linear_work = lm(UHRSWORK ~ AGE + female + FAMSIZE + + educ_hs + educ_somecoll + educ_college + educ_advdeg)
+summary(Linear_work)
+detach()
+```
+
+5) Through this regression above you can see that being female has a negative effect on Work hours this is statistically significant compared to a no effect null hypothesis. 
+
+some other relevent groups are also provided
+
+```{r}
+attach(acs2017_ny)
+Linear_work = lm(UHRSWORK ~ AGE + I(AGE^2)+ female + FAMSIZE + + educ_hs + educ_somecoll + educ_college + educ_advdeg)
+summary(Linear_work)
+detach()
+```
+
+6a)  I choose to use age, gender, and educational level because they seem the most direct impact on work hours.
+I added AGE^2 compared to my earlier more simple OSL model because it shows nicely why I wanted to leave out ages below 25 and above 55. The negative coefficient associated with AGE^2 indicates there is a downward facing curve meaning that the early and late ages are lower in hours worked which matches my assumption that youger and older peopel are more negatively effected in relation to their work hours purly due to their AGE.
+
+b) The estimates all seem plausible, age is positive because even though young and old poeple don't work as much there are much less you poeple then older peopel working so thie will have an over all positve slope.
+  Females are more likely to take up house hold work compared to men which isn't reflected in workhours that are being measured here.
+  and lastly educational level, the more education you obtain the more likely you are to work more, which also follows because education is an investment into makeing more money when you do start working. so people with high education would be more willing to put in more time working since they get compensated more for their time.
+  
+c) The age Polynomial and education dummies are all non zero. meaning they are reasonable to include in the model
+d) The predicted probability for being female is a -4.351% difference from males
+  for age, every 1 increment increase in age increasing your probability of increased work hours by 1.382
+
+e) there are no type 1 ore type 2 errors in this model, there are no false positive or negatives.
+
+
+
+```{r}
+attach(acs2017_ny)
+use_varb <- (AGE >= 25) & (AGE <= 55) 
+Work_Fulltime <- (UHRSWORK >= 35)
+dat_use <- subset(acs2017_ny,use_varb) # 
+detach()
+```
+
+
+```{r}
+attach(acs2017_ny)
+logit_work = glm(Work_Fulltime ~ AGE + I(AGE^2)+ female + I(AGE*female) + FAMSIZE + + educ_hs + educ_somecoll + educ_college + educ_advdeg)
+summary(logit_work)
+detach()
+```
+7)
+a) I am going to continue to use the same variables i used in the imple OLS model so i can compare them to this Logit model using the y variable Work_fulltime. age^2 is again resonable to include since it creates a more realisitic interpretation of how age especially affects individuals ability to work full time. I also allow age and gender to interact in this model since the effects of gender on full time work are heavily dependent on age, since young peopel are not getting married as much and you and old poeple have lower family size which we saw in the previous model has a possitive effect on hours worked. Again the variables i ahve chosen are the largest influencers on work ours the main variable that might have a reverse relationship is family size. it is unclear weather a large family causes more work hours or the reverse.
+
+b) These estimates again seem plausible and they are all statistically significant.
+
+C) The age Polynomial and education dummies are all non zero. meaning they are reasonable to include in the model
+
+d)  The predicted probability for being female is a -.07488% difference from males which is significantly different from the previous model, this most likely do do the no linear relationship tthat gender has meaning that much of the true predictive ability of the model is lost when it is linear. also the impact ofalow age to interact with gender has resonably large effect on gender.
+  for age, every 1 increment increase in age increasing your probability of increased work hours by 0.03051%
+  
+e) there are no type 1 ore type 2 errors in this model, there are no false positive or negatives.
+
+```{r}
+install.packages("quantreg")
+library(quantreg)
+```
+
+
+```{r}
+attach(acs2017_ny)
+rqfit = rq(Work_Fulltime ~ AGE + female)
+summary(rqfit, se = "boot")
+detach()
+```
+
+
+
+8) i think the logit model is the best model currently, it allows for the most interactions between the variables whare are highly related to begin with. i think the linear model is good at predicting weather a variable will have a negative or positve effect the degree to which is more or less lost compared to the logit model. the quantile regression i am unsure of its predictive accuracy since i have not used it before and am not sure if it is even resonable to use in this fassion. 
+
+
+I have left out the quantile regression in the r markdown since i was not able to get it to knitt. it willl be in teh RMD file
+
+
+
